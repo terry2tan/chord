@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset=utf-8>
+	<title>全球人口流动</title>
+	<meta name=description content="Global Migration Data Sheet 2013: Unique estimates of migration flows between the top 50 sending and receiving countries.">
+	<meta name=viewport content="width=device-width, initial-scale=1.0">
+  <link rel="icon" href="favicon.png" type="image/png">
+	<link href="dist/app-v1.css" rel="stylesheet" media="all">
+
+	<!--[if lt IE 9]><script src=javascripts/html5shiv-printshiv.js></script><![endif]-->
+  <script src="dist/app-v1.js"></script>
+</head>
+<body>
+  <div id=container class="container">
+
+  	<header role="banner">
+  		<h1>全球人口流动</h1>
+      <div class="lead-in">
+        探索全球地区间和地区内人口，自1990年到2010年每五年迁移流动情况。点击对应地区查看具体国家间流动迁移情况。
+      </div>
+      <div class="credits">
+        作者： <a href="http://www.oeaw.ac.at/vid/staff/staff_nikola_sander.shtml">Nikola Sander</a>, 
+        <a href="http://www.oeaw.ac.at/vid/staff/staff_guy_abel.shtml">Guy J. Abel</a> &amp; 
+        <a href="http://www.oeaw.ac.at/vid/staff/staff_ramon_bauer.shtml">Ramon Bauer</a> <br>
+        单位：<a href="http://www.wittgensteincentre.org">维特根斯坦全球人口和全球人力资本研究中心（Wittgenstein Centre for Demography and Global Human Capital）</a>   <br>
+        汉化作者：<a href="http://weibo.com/shenhaolaoshi">沈浩</a> &amp;<a href="http://weibo.com/fengmengxia"> 谈和 </a>    <br>
+        单位：<a href="http://www.cuc.edu.cn">中国传媒大学（Communication University of China）</a>
+      </div>
+      <hr>
+  	</header>
+  	
+  	<div class="wrap">
+  		<main role="main">
+        <nav role=navigation>
+          <div id="timeline"></div>
+        </nav>
+        <div id="diagram"></div>
+  		</main>
+  	</div>
+  	
+
+  	<footer role="contentinfo">
+
+      <hr>
+
+      <div class="column-wrap-3">
+
+        <div class="column">
+          <h3>更多了解</h3>
+          <p>
+            Abel &amp; Sander (2014).
+            <a href="http://www.sciencemag.org/cgi/content/abstract/343/6178/1520?ijkey=ypit4/xi7wo4M&keytype=ref&siteid=sci" target="_blank">Quantifying Global International Migration Flows</a>.
+            Science, 343 (6178).
+          </p>
+          <p>Abel (2013). <a href="http://www.demographic-research.org/volumes/vol28/18/28-18.pdf" target=_blank>Estimating global migration flow tables using place of birth data</a>. Demographic Research 28(18):505-546.</p>
+          <p>Sander et al. (2014). <a href="VID%20WP%20Visualising%20Migration%20Flow%20Data%20with%20Circular%20Plots.pdf">Visualising migration flow data with circular plots</a>. VID Working paper 02/14. Vienna Institute of Demography, Austria.</p>
+        </div>
+
+        <div class="column">
+          <h3>联系方式</h3>
+          <p>
+            About the circular plots:<br>
+            <a href="mailto:nikola.sander@oeaw.ac.at">nikola.sander@oeaw.ac.at</a>
+          </p>
+          <p>
+            About the data:<br>
+            <a href="mailto:guy.abel@oeaw.ac.at">guy.abel@oeaw.ac.at</a>
+          </p>
+        </div>
+
+        <div class="column">
+          <h3>关于作者</h3>
+          <p>
+            Provided by<br>
+            <a href="http://www.wittgensteincentre.org"><img src="images/wittgenstein.png"></a>
+            <a href="http://www.oeaw.ac.at/vid/"><img src="images/vid.png"></a>
+          </p>
+          <p>Coded by <a href="http://null2.net"><img src="images/null2.png"></a></p>
+          <p>Screendesign by <a href="http://elvirastein.com/">Elvira Stein</a></p>
+          <p>Inspired by Martin Krzywinski's <a href="http://circos.ca/">Circos</a> and Mike Bostock’s <a href="http://d3js.org/">D3.js library</a>.</p>
+        </div>
+
+        <div class="clear"></div>
+
+      </div>
+
+      <hr>
+
+      <div class="license">
+        Version <span class="version">1.0.19 (Febuary 2014)</span>. 
+        This work is licensed under a <a href="http://creativecommons.org/licenses/by-nc/3.0/">Creative Commons Attribution-NonCommercial 3.0 Unported License.</a>
+        <a href="http://creativecommons.org/licenses/by-nc/3.0/"><img src="images/by-nc.png"></a>
+      </div>
+
+      
+
+  <script>
+    // help
+    (function() {
+      var help = d3.select('#help');
+
+      help.on('click', function() {
+        var isActive = help.classed('active');
+
+        help
+          .classed('active', !isActive)
+          .transition()
+          .style('width', isActive ? '30px' : '572px');
+      });
+
+      function helpOffset() {
+        var offset = Math.max((document.body.clientWidth - document.getElementById('container').clientWidth) / 2, 0);
+
+        help.style('right', offset + 'px');
+      }
+      d3.select(window).on('resize.help-resize', helpOffset);
+      helpOffset();
+    })();
+  </script>
+
+
+  <script>
+    (function() {
+
+      var datafile = 'json/migrations.json';
+      var aLittleBit = Math.PI / 100000;
+
+      d3.json(datafile, function(data) {
+        var now = 2005;
+        var chart = Globalmigration.chart(data, {
+          element: '#diagram',
+          now: now,
+          animationDuration: 500,
+          margin: 125,
+          arcPadding: 0.04,
+          layout: {
+            threshold: 50000,
+            labelThreshold: 5000,
+            colors: 'cd3d08 ec8f00 6dae29 683f92 b60275 2058a5 00a592 009d3c 378974 ffca00'.split(' ').map(function(c) { return '#' + c; })
+          }
+        });
+
+        Globalmigration.timeline(chart, {
+          now: now,
+          element: '#timeline'
+        });
+
+        chart.draw(now);
+      });
+    })();
+
+  </script>
+
+  <div id="fb-root"></div>
+
+
+  <script>
+    (function() {
+      function loadScript(d,s,l,id){
+        var js,
+        fjs=d.getElementsByTagName(s)[0],
+        p=/^http:/.test(d.location)?'http':'https';
+        if(!id || !d.getElementById(id)){
+          js=d.createElement(s);
+          js.id=id;
+          js.src=p+'://' + l;
+          fjs.parentNode.insertBefore(js,fjs);
+        }
+      }
+
+      loadScript(document, 'script', 'connect.facebook.net/en_US/all.js#xfbml=1', 'facebook-jssdk');
+      if (typeof gapi === 'object') {
+        gapi.plusone.render("plusone-div", {size: 'medium', annotation: 'bubble', width: '250px'});
+      }
+      loadScript(document, 'script', 'platform.twitter.com/widgets.js', 'twitter-wjs');
+    })();
+  </script>
+
+	<script>
+		var _gaq=[['_setAccount','UA-42659946-1'],['_trackPageview']];(function(a,b){var c=a.createElement(b),d=a.getElementsByTagName(b)[0];c.src=("https:"==location.protocol?"//ssl":"//www")+".google-analytics.com/ga.js";d.parentNode.insertBefore(c,d)})(document,"script");
+	</script>
+</body>
+</html>
